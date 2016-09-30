@@ -1,0 +1,24 @@
+puppet3:
+  stage: test
+  image: 'registry.vshn.net/vshn/dockerfiles:puppetci3'
+  script:
+    - test_parser_validate.sh
+    - puppet-check --style .
+
+puppet3-future:
+  stage: test
+  image: 'registry.vshn.net/vshn/dockerfiles:puppetci3'
+  variables:
+    STRICT_VARIABLES: 'yes'
+    FUTURE_PARSER: 'yes'
+  script:
+    - test_parser_validate.sh
+    - puppet-check --style --future .
+
+puppet4:
+  stage: test
+  image: 'registry.vshn.net/vshn/dockerfiles:puppetci4'
+  script:
+    - test_parser_validate.sh
+    - puppet-check --style .
+

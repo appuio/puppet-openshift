@@ -1,0 +1,16 @@
+{
+  "name": "vshn-openshift",
+  "version": "0.0.1",
+  "author": "vshn",
+  "summary": "OpenShift with Ansible",
+  "license": "BSD-3-Clause",
+  "source": "",
+  "project_page": "",
+  "issues_url": "",
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": ">= 1.0.0"
+    }
+  ]
+}
