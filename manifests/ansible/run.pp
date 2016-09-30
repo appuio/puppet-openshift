@@ -16,7 +16,7 @@ define openshift::ansible::run (
     cwd       => $cwd,
     logoutput => 'on_failure',
     path      => $::path,
-    timeout   => 1000,
+    timeout   => 0,
     unless    => "/usr/local/bin/puppet_run_ansible.sh -c ${check_options} ${name} ${options}",
   }
 
