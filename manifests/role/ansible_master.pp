@@ -1,8 +1,10 @@
 class openshift::role::ansible_master (
-  $playbooks_version = 'master',
-  $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
-  $ansible_hosts_vars = {},
   $ansible_hosts_children = {},
+  $ansible_hosts_vars = {},
+  $masters_as_nodes = true,
+  $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
+  $playbooks_version = 'master',
+  $run_ansible = true,
 ) {
 
   # Install pre-req packages for the ansible master
@@ -52,11 +54,14 @@ class openshift::role::ansible_master (
     owner  => 'root',
     group  => 'root',
     mode   => '0770',
-  } ->
+  }
 
   # Execute Ansible
-  ::openshift::ansible::run { 'playbooks/byo/config.yml':
-    cwd => '/usr/share/openshift-ansible',
+  if $run_ansible {
+    ::openshift::ansible::run { 'playbooks/byo/config.yml':
+      cwd     => '/usr/share/openshift-ansible',
+      require => File['/usr/local/bin/puppet_run_ansible.sh'],
+    }
   }
 
 }

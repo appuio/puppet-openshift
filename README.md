@@ -1,8 +1,15 @@
 # TODOs
 
+* Firewall stuff!
 * Deploy Ansible user and SSH key (see profile_openshift3::ansible)
 * Default ansible_hosts_vars and merge with the one from Hiera
 * ansible_hosts_vars probably in init.pp for further processing
+* masters should also be in nodes children
+* Manage /etc/sysconfig/docker-storage-setup
+* Manage partitioning (LVM volume preparation)
+* Integrate Gluster Playbook ?
+* Masters as Nodes -> merge hashes
+* $run_ansible parameter
 * Yum Versionlock support
 * Support for OCP
 * Integration into profile_openshift3
@@ -16,6 +23,8 @@ classes:
   - openshift::role::ansible_master
   - profile_openshift3::ansible
 
+openshift::role::ansible_master::run_ansible: false
+openshift::role::ansible_master::masters_as_nodes: true
 openshift::role::ansible_master::playbooks_version: 'openshift-ansible-3.3.28-1'
 openshift::role::ansible_master::ansible_hosts_vars:
   ansible_become: true
@@ -23,6 +32,7 @@ openshift::role::ansible_master::ansible_hosts_vars:
   containerized: true
   deployment_type: origin
   docker_version: 1.10.3
+  openshift_hosted_manage_registry: true
   openshift_install_examples: true
   openshift_master_default_subdomain: apps.test.example.com
   openshift_master_identity_providers: [{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
@@ -35,7 +45,7 @@ openshift::role::ansible_master::ansible_hosts_children:
     - name: origin-master1.vagrant.dev
       node_labels:
         region: infra
-      schedulable: false
+      schedulable: true
   nodes:
     - name: origin-node1.vagrant.dev
       node_labels:

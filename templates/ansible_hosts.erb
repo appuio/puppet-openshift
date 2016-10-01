@@ -37,6 +37,12 @@ def children_formater(child)
 
  return result
 end
+if @masters_as_nodes
+  @ansible_hosts_children['nodes'] = @ansible_hosts_children['nodes'].concat(@ansible_hosts_children['masters'])
+  _ansible_hosts_children = @ansible_hosts_children
+else
+  _ansible_hosts_children = @ansible_hosts_children
+end
 -%>
 # THIS FILE IS MANAGED BY PUPPET MODULE openshift
 [OSEv3:children]
@@ -46,7 +52,7 @@ end
 
 [OSEv3:vars]
 <%= hosts_vars_formater(@ansible_hosts_vars) %>
-<%- @ansible_hosts_children.keys.each do |k| -%>
+<%- _ansible_hosts_children.keys.each do |k| -%>
 [<%= k %>]
-<%= children_formater(@ansible_hosts_children[k]) %>
+<%= children_formater(_ansible_hosts_children[k]) %>
 <%- end -%>
