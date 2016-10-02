@@ -8,6 +8,7 @@
 * Manage /etc/sysconfig/docker-storage-setup
 * Manage partitioning (LVM volume preparation)
 * Integrate Gluster Playbook ?
+* Registry IP
 * Masters as Nodes -> merge hashes
 * $run_ansible parameter
 * Yum Versionlock support
@@ -43,11 +44,13 @@ openshift::role::ansible_master::ansible_hosts_vars:
 openshift::role::ansible_master::ansible_hosts_children:
   masters:
     - name: origin-master1.vagrant.dev
+      ip: 192.168.216.201
       node_labels:
         region: infra
       schedulable: true
   nodes:
     - name: origin-node1.vagrant.dev
+      ip: 192.168.216.210
       node_labels:
         region: vagrant
 
