@@ -15,6 +15,13 @@
 * Support for OCP
 * Integration into profile_openshift3
 * Documentation
+** vagrant.dev is not allowed in resolv.conf search when landrush returns wildcard
+   answers. see
+* openshift_hosted_router_selector='region=infra'
+* openshift_hosted_router_replicas=2
+* openshift_hosted_registry_selector='region=infra'
+* openshift_hosted_registry_replicas=2
+* https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.origin.example
 
 # Example Hieradata
 
