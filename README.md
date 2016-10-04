@@ -163,3 +163,9 @@ private_networks:
     auto_config: true
 ```
 
+
+# Usage
+
+## Create OpenShift User
+
+Do this in VM origin-master1 as root: `htpasswd /etc/origin/master/htpasswd <username>`
