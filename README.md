@@ -2,15 +2,12 @@
 
 * Firewall stuff!
 * Deploy Ansible user and SSH key (see profile_openshift3::ansible)
-* Default ansible_hosts_vars and merge with the one from Hiera
+* Default ansible_hosts_vars and merge with the one from Hiera -> belongs into profile?!
 * ansible_hosts_vars probably in init.pp for further processing
-* masters should also be in nodes children
 * Manage /etc/sysconfig/docker-storage-setup
 * Manage partitioning (LVM volume preparation)
 * Integrate Gluster Playbook ?
 * Registry IP
-* Masters as Nodes -> merge hashes
-* $run_ansible parameter
 * Yum Versionlock support
 * Support for OCP
 * Integration into profile_openshift3
@@ -24,6 +21,8 @@
 * https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.origin.example
 
 # Example Hieradata
+
+## vagrant/hieradata_nodes/origin-master1.vagrant.dev.yaml
 
 ```
 ---
@@ -60,68 +59,106 @@ openshift::role::ansible_master::ansible_hosts_children:
       ip: 192.168.216.210
       node_labels:
         region: vagrant
+    - name: origin-node2.vagrant.dev
+      ip: 192.168.216.211
+      node_labels:
+        region: vagrant
 
 profile_openshift3::ansible::ssh_public_key: ''
 profile_openshift3::ansible::ssh_private_key: |
 ```
 
-#### Table of Contents
+## vagrant/hieradata_nodes/origin-node1.vagrant.dev.yaml
 
-1. [Overview](#overview)
-2. [Module Description - What the module does and why it is useful](#module-description)
-3. [Setup - The basics of getting started with openshift](#setup)
-    * [What openshift affects](#what-openshift-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with openshift](#beginning-with-openshift)
-4. [Usage - Configuration options and additional functionality](#usage)
-5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
+```
+---
+classes:
+  - profile_openshift3::ansible
 
-## Overview
+profile_openshift3::ansible::ssh_public_key: ''
+```
 
-A one-maybe-two sentence summary of what the module does/what problem it solves. This is your 30 second elevator pitch for your module. Consider including OS/Puppet version it works with.       
+## vagrant/hieradata_nodes/origin-node2.vagrant.dev.yaml
 
-## Module Description
+```
+---
+classes:
+  - profile_openshift3::ansible
 
-If applicable, this section should have a brief description of the technology the module integrates with and what that integration enables. This section should answer the questions: "What does this module *do*?" and "Why would I use it?"
+profile_openshift3::ansible::ssh_public_key: ''
+```
 
-If your module has a range of functionality (installation, configuration, management, etc.) this is the time to mention it.
+# vmdefinitions
 
-## Setup
+## vagrant/vmdefinitions/origin-master1.vagrant.dev.yaml
 
-### What openshift affects
+```
+---
+## Puppet ENC
+environment: 'VshnProduction'
+parameters:
+  customer: 'local'
+  project: 'origin'
+  role: 'master'
+  location: 'vagrant'
+  stage: 'dev'
 
-* A list of files, packages, services, or operations that the module will alter, impact, or execute on the system it's installed on.
-* This is a great place to stick any warnings.
-* Can be in list or paragraph form. 
+## Vagrant VM definition
+cores: 2
+memory: 2048
+box: 'puppetlabs/centos-7.2-64-nocm'
+private_networks:
+  default:
+    type: 'static'
+    ip: '192.168.216.201'
+    auto_config: true
+```
 
-### Setup Requirements **OPTIONAL**
+## vagrant/vmdefinitions/origin-node1.vagrant.dev.yaml
 
-If your module requires anything extra before setting up (pluginsync enabled, etc.), mention it here. 
+```
+---
+## Puppet ENC
+environment: 'VshnProduction'
+parameters:
+  customer: 'local'
+  project: 'origin'
+  role: 'master'
+  location: 'vagrant'
+  stage: 'dev'
 
-### Beginning with openshift
+## Vagrant VM definition
+cores: 2
+memory: 2048
+box: 'puppetlabs/centos-7.2-64-nocm'
+private_networks:
+  default:
+    type: 'static'
+    ip: '192.168.216.210'
+    auto_config: true
+```
 
-The very basic steps needed for a user to get the module up and running. 
+## vagrant/vmdefinitions/origin-node2.vagrant.dev.yaml
 
-If your most recent release breaks compatibility or requires particular steps for upgrading, you may wish to include an additional section here: Upgrading (For an example, see http://forge.puppetlabs.com/puppetlabs/firewall).
+```
+---
+## Puppet ENC
+environment: 'VshnProduction'
+parameters:
+  customer: 'local'
+  project: 'origin'
+  role: 'master'
+  location: 'vagrant'
+  stage: 'dev'
 
-## Usage
+## Vagrant VM definition
+cores: 2
+memory: 2048
+box: 'puppetlabs/centos-7.2-64-nocm'
+private_networks:
+  default:
+    type: 'static'
+    ip: '192.168.216.211'
+    auto_config: true
+```
 
-Put the classes, types, and resources for customizing, configuring, and doing the fancy stuff with your module here. 
-
-## Reference
-
-Here, list the classes, types, providers, facts, etc contained in your module. This section should include all of the under-the-hood workings of your module so people know what the module is touching on their system but don't need to mess with things. (We are working on automating this section!)
-
-## Limitations
-
-This is where you list OS compatibility, version compatibility, etc.
-
-## Development
-
-Since your module is awesome, other users will want to play with it. Let them know what the ground rules for contributing are.
-
-## Release Notes/Contributors/Etc **Optional**
-
-If you aren't using changelog, put your release notes here (though you should consider using changelog). You may also add any additional sections you feel are necessary or important to include here. Please use the `## ` header. 
