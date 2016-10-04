@@ -37,8 +37,12 @@ openshift::role::ansible_master::ansible_hosts_vars:
   deployment_type: origin
   docker_version: 1.10.3
   openshift_hosted_manage_registry: true
+  openshift_hosted_registry_replicas: 1
+  openshift_hosted_registry_selector: 'region=vagrant'
+  openshift_hosted_router_replicas: 1
+  openshift_hosted_router_selector: 'router=local'
   openshift_install_examples: true
-  openshift_master_default_subdomain: apps.test.example.com
+  openshift_master_default_subdomain: 192.168.216.210.xip.io
   openshift_master_identity_providers: [{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
   openshift_release: v1.3.0
   openshift_use_manageiq: false
