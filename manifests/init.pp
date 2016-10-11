@@ -22,6 +22,7 @@
 # Copyright 2015 vshn
 #
 class openshift (
-) inherits ::openshift::params {
+  $ansible_hosts_vars = {},
+) {
 
 }

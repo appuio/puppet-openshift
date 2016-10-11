@@ -2,15 +2,12 @@
 
 * Firewall stuff!
 * Deploy Ansible user and SSH key (see profile_openshift3::ansible)
-* Default ansible_hosts_vars and merge with the one from Hiera -> belongs into profile?!
-* ansible_hosts_vars probably in init.pp for further processing
 * Manage /etc/sysconfig/docker-storage-setup
 * Manage partitioning (LVM volume preparation)
 * Integrate Gluster Playbook ?
 * Registry IP
 * Yum Versionlock support
 * Support for OCP
-* Integration into profile_openshift3
 * Documentation
 ** vagrant.dev is not allowed in resolv.conf search when landrush returns wildcard
    answers. see
@@ -67,6 +64,8 @@ openshift::role::ansible_master::ansible_hosts_children:
 
 profile_openshift3::ansible::ssh_public_key: ''
 profile_openshift3::ansible::ssh_private_key: |
+
+vshn_infra::hostfirewall::enabled: false
 ```
 
 ## vagrant/hieradata_nodes/origin-node1.vagrant.dev.yaml
@@ -77,6 +76,8 @@ classes:
   - profile_openshift3::ansible
 
 profile_openshift3::ansible::ssh_public_key: ''
+
+vshn_infra::hostfirewall::enabled: false
 ```
 
 ## vagrant/hieradata_nodes/origin-node2.vagrant.dev.yaml
@@ -87,6 +88,8 @@ classes:
   - profile_openshift3::ansible
 
 profile_openshift3::ansible::ssh_public_key: ''
+
+vshn_infra::hostfirewall::enabled: false
 ```
 
 # vmdefinitions
