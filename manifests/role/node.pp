@@ -5,4 +5,4 @@ class openshift::role::node (
   ensure_packages([
     'lvm2',
   ])
-
+}
