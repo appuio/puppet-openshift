@@ -27,6 +27,5 @@ class openshift::util::cacert {
   exec { 'openshift-update-ca-trust':
     refreshonly => true,
     command     => '/bin/update-ca-trust',
-  } ->
-  Package[ansible]
+  }
 }
