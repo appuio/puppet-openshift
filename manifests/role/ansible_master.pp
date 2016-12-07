@@ -6,6 +6,7 @@ class openshift::role::ansible_master (
   $playbooks_version = 'master',
   $run_ansible = true,
 ) {
+  include ::openshift::util::cacert
 
   # Install pre-req packages for the ansible master
   # This needs epel enabled and we probably need
@@ -58,6 +59,7 @@ class openshift::role::ansible_master (
 
   # Execute Ansible
   if $run_ansible {
+    Exec['openshift-update-ca-trust'] ->
     ::openshift::ansible::run { 'playbooks/byo/config.yml':
       cwd     => '/usr/share/openshift-ansible',
       require => File['/usr/local/bin/puppet_run_ansible.sh'],
