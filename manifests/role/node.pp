@@ -15,4 +15,17 @@ class openshift::role::node (
     'wget',
   ])
 
+  if downcase($::operatingsystem) == 'centos' {
+    # The OpenShift Ansible playbooks require NetworkManager to be enabled and
+    # started. Unlike on RedHat, CentOS does not install NetworkManager by default.
+    # The playbooks don't handle this situation as of version 3.3.57-1.
+    #
+    # https://github.com/openshift/openshift-ansible/issues/1807
+    #
+    Package[NetworkManager] ->
+    service { 'openshift-networkmanager':
+      ensure => 'running',
+      enable => true,
+    }
+  }
 }
