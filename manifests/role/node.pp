@@ -24,6 +24,7 @@ class openshift::role::node (
     #
     Package[NetworkManager] ->
     service { 'openshift-networkmanager':
+      name   => 'NetworkManager',
       ensure => 'running',
       enable => true,
     }
