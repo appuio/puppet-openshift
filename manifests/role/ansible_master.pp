@@ -1,6 +1,16 @@
+# == openshift::role::ansible_master
+#
+# === Parameters
+#
+# [*ansible_version*]
+#   Ansible version to install, usede for version lock. Must either be an exact
+#   Version number or end in `*`!
+#   Default: (see code)
+#
 class openshift::role::ansible_master (
   $ansible_hosts_children = {},
   $ansible_hosts_vars = $::openshift::ansible_hosts_vars,
+  $ansible_version = '2.2.*',
   $masters_as_nodes = true,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
@@ -8,9 +18,22 @@ class openshift::role::ansible_master (
 ) {
   include ::openshift::util::cacert
 
+  # Lock some versions
+  if $ansible_hosts_vars['docker_version'] {
+    $_docker_packages = ['docker', 'docker-common', 'docker-selinux']
+    ::openshift::util::yum_versionlock { $_docker_packages:
+      ensure => $ansible_hosts_vars['docker_version']
+    }
+  }
+
+  ::openshift::util::yum_versionlock { ['ansible']:
+    ensure      => $ansible_version,
+    yum_options => '--enablerepo=epel',
+  } ->
+  Package['ansible']
+
   # Install pre-req packages for the ansible master
-  # This needs epel enabled and we probably need
-  # to version-lock ansible TODO
+  # This needs epel enabled
   ensure_packages([
     'ansible',
     'git',
