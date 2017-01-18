@@ -18,14 +18,6 @@ class openshift::role::ansible_master (
 ) {
   include ::openshift::util::cacert
 
-  # Lock some versions
-  if $ansible_hosts_vars['docker_version'] {
-    $_docker_packages = ['docker', 'docker-common', 'docker-selinux']
-    ::openshift::util::yum_versionlock { $_docker_packages:
-      ensure => $ansible_hosts_vars['docker_version']
-    }
-  }
-
   ::openshift::util::yum_versionlock { ['ansible']:
     ensure      => $ansible_version,
     yum_options => '--enablerepo=epel',
