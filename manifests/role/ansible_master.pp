@@ -20,7 +20,6 @@ class openshift::role::ansible_master (
 
   ::openshift::util::yum_versionlock { ['ansible']:
     ensure      => $ansible_version,
-    yum_options => '--enablerepo=epel',
   } ->
   Package['ansible']
 
