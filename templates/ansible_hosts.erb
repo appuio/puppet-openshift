@@ -1,53 +1,39 @@
 <%-
-def hosts_vars_formatter(vars)
-  result = ""
-  vars.each do |key, value|
-    if value.is_a?(TrueClass)
-      result += "#{key}=True\n"
-    elsif value.is_a?(FalseClass)
-      result += "#{key}=False\n"
-    elsif value.is_a?(String)
-      result += "#{key}=#{value.gsub(/\n/, %q{\\n})}\n"
-    else
-      result += "#{key}=#{value.to_json}\n"
-    end
+require 'shellwords'
+
+def ansiblize(value)
+  if value.is_a?(FalseClass)
+    return 'False'
   end
 
-  return result
-end
-def children_formatter(child)
- result = ""
- child.each do |config|
-   result += config['name']
-   config.each do |key, value|
-     next if key == 'name'
-     if value.is_a?(TrueClass)
-       result += " openshift_#{key}=True"
-     elsif value.is_a?(FalseClass)
-       result += " openshift_#{key}=False"
-     elsif value.is_a?(String)
-       result += " openshift_#{key}='#{value}'"
-     else
-       result += " openshift_#{key}='#{value.to_json}'"
-     end
-   end
+  if value.is_a?(TrueClass)
+    return 'True'
+  end
 
-   result += "\n"
- end
-
- return result
+  return value.to_json
 end
 -%>
-# THIS FILE IS MANAGED BY PUPPET MODULE openshift
-[OSEv3:children]
-<%- @ansible_hosts_children.keys.each do |k| -%>
-<%= k %>
-<%- end -%>
+# THIS FILE IS MANAGED BY PUPPET MODULE <%= @module_name %>
+<% @host_groups.sort.each do |group, values| -%>
 
-[OSEv3:vars]
-<%= hosts_vars_formatter(@ansible_hosts_vars) %>
+<%   if not (children = values.fetch('children', {})).empty? -%>
+[<%= group %>:children]
+<%     children.sort.each do |i| -%>
+<%= i %>
+<%     end -%>
+<%   end -%>
 
-<%- @ansible_hosts_children.keys.each do |k| -%>
-[<%= k %>]
-<%= children_formatter(@ansible_hosts_children[k]) %>
-<%- end -%>
+<%   if not (vars = values.fetch('vars', {})).empty? -%>
+[<%= group %>:vars]
+<%     vars.sort.each do |key, value| -%>
+<%= key %>=<%= ansiblize(value) %>
+<%     end -%>
+<%   end -%>
+
+<%   if not (hosts = values.fetch('hosts', {})).empty? -%>
+[<%= group %>]
+<%     hosts.sort.each do |i, hostvars| -%>
+<%= i %> <%= hostvars.sort.map { |key, value| "#{key}=#{Shellwords.escape(ansiblize(value))}" }.join(' ') %>
+<%     end -%>
+<%   end -%>
+<% end -%>

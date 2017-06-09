@@ -2,12 +2,43 @@
 #
 # === Parameters
 #
+# [*host_groups*]
+#   Hash describing Ansible host groups. Each entry has the group name as its
+#   key and the optional keys "children" (array with child groups), "vars"
+#   (group-wide variables) or "hosts" (hash with machine names and hash as
+#   a value; the latter hash contains per-machine variables). Node names can be
+#   the full syntax supported by Ansible (i.e. "node[1:4].example.com").
+#
+#   Example: {
+#     OSEv3 => {
+#       children => ["nodes", "masters"],
+#     },
+#     masters => {
+#       vars => {
+#         osm_default_node_selector => "foo=bar",
+#       },
+#       hosts => {
+#         "master1.example.com" => {},
+#         "master2.example.com" => {},
+#       },
+#       children => ["etcd"],
+#     },
+#     nodes => {
+#       hosts => {
+#         "node[1:9].example.com" => {
+#           custom_var => true,
+#         },
+#       },
+#     },
+#   }
+#
 class openshift::role::ansible_master (
-  $ansible_hosts_vars,
-  $ansible_hosts_children = {},
+  $host_groups,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
 ) {
+  validate_hash($host_groups)
+
   include ::openshift::util::cacert
 
   ::openshift::util::yum_versionlock { ['ansible']:
@@ -50,14 +81,17 @@ class openshift::role::ansible_master (
       require => Package[ansible],
     })
 
-  # Write Ansible hosts file (this is the main configuration!)
+  # Main Ansible configuration
   file { '/etc/ansible/hosts':
-    ensure  => file,
-    content => template('openshift/ansible_hosts.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Package['ansible'],
+    ensure       => file,
+    content      => template('openshift/ansible_hosts.erb'),
+    owner        => 'root',
+    group        => 'root',
+    mode         => '0640',
+    require      => Package['ansible'],
+
+    # https://docs.ansible.com/ansible/meta_module.html
+    validate_cmd => '/bin/ansible -i % -m meta -a noop localhost',
   }
 
   # Remove script no longer in use
