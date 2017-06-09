@@ -8,7 +8,6 @@ class openshift::role::ansible_master (
   $masters_as_nodes = true,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
-  $run_ansible = true,
 ) {
   include ::openshift::util::cacert
 
@@ -54,24 +53,10 @@ class openshift::role::ansible_master (
     group   => 'root',
     mode    => '0640',
     require => Package['ansible'],
-  } ->
+  }
 
-  # Deploy the Ansible run script
+  # Remove script no longer in use
   file { '/usr/local/bin/puppet_run_ansible.sh':
-    ensure => file,
-    source => 'puppet:///modules/openshift/puppet_run_ansible.sh',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0770',
+    ensure => absent,
   }
-
-  # Execute Ansible
-  if $run_ansible {
-    Exec['openshift-update-ca-trust'] ->
-    ::openshift::ansible::run { 'playbooks/byo/config.yml':
-      cwd     => '/usr/share/openshift-ansible',
-      require => File['/usr/local/bin/puppet_run_ansible.sh'],
-    }
-  }
-
 }
