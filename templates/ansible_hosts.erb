@@ -1,5 +1,5 @@
 <%-
-def hosts_vars_formater(vars)
+def hosts_vars_formatter(vars)
   result = ""
   vars.each do |key, value|
     if value.is_a?(TrueClass)
@@ -15,7 +15,7 @@ def hosts_vars_formater(vars)
 
   return result
 end
-def children_formater(child)
+def children_formatter(child)
  result = ""
  child.each do |config|
    result += config['name']
@@ -51,8 +51,8 @@ end
 <%- end -%>
 
 [OSEv3:vars]
-<%= hosts_vars_formater(@ansible_hosts_vars) %>
+<%= hosts_vars_formatter(@ansible_hosts_vars) %>
 <%- _ansible_hosts_children.keys.each do |k| -%>
 [<%= k %>]
-<%= children_formater(_ansible_hosts_children[k]) %>
+<%= children_formatter(_ansible_hosts_children[k]) %>
 <%- end -%>
