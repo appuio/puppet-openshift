@@ -3,8 +3,8 @@
 # === Parameters
 #
 class openshift::role::ansible_master (
+  $ansible_hosts_vars,
   $ansible_hosts_children = {},
-  $ansible_hosts_vars = $::openshift::ansible_hosts_vars,
   $masters_as_nodes = true,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
