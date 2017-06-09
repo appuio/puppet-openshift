@@ -5,7 +5,6 @@
 class openshift::role::ansible_master (
   $ansible_hosts_vars,
   $ansible_hosts_children = {},
-  $masters_as_nodes = true,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
 ) {
