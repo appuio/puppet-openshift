@@ -2,15 +2,9 @@
 #
 # === Parameters
 #
-# [*ansible_version*]
-#   Ansible version to install, usede for version lock. Must either be an exact
-#   Version number or end in `*`!
-#   Default: (see code)
-#
 class openshift::role::ansible_master (
   $ansible_hosts_children = {},
   $ansible_hosts_vars = $::openshift::ansible_hosts_vars,
-  $ansible_version = '2.2.0.*',
   $masters_as_nodes = true,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
@@ -19,7 +13,7 @@ class openshift::role::ansible_master (
   include ::openshift::util::cacert
 
   ::openshift::util::yum_versionlock { ['ansible']:
-    ensure      => $ansible_version,
+    ensure => absent,
   } ->
   Package['ansible']
 
