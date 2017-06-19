@@ -43,8 +43,8 @@ class openshift::role::ansible_master (
 
   ::openshift::util::yum_versionlock { ['ansible']:
     ensure => absent,
-  } ->
-  Package['ansible']
+  }
+  -> Package['ansible']
 
   # Install pre-req packages for the ansible master
   # This needs epel enabled
@@ -73,7 +73,7 @@ class openshift::role::ansible_master (
     'ssh-conn-controlpath' => {
       section => 'ssh_connection',
       setting => 'control_path',
-      value   => '/tmp/ansible-ssh-%%C',
+      value   => '/tmp/ansible-ssh-%%h-%%p-%%r',
     },
     }, 'ansible-cfg-'), {
       ensure  => present,
