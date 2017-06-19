@@ -43,8 +43,8 @@ class openshift::role::ansible_master (
 
   ::openshift::util::yum_versionlock { ['ansible']:
     ensure => absent,
-  }
-  -> Package['ansible']
+  } ->
+  Package['ansible']
 
   # Install pre-req packages for the ansible master
   # This needs epel enabled
@@ -82,15 +82,6 @@ class openshift::role::ansible_master (
     })
 
   # Main Ansible configuration
-  file { '/etc/ansible/ansible.cfg':
-    ensure  => file,
-    content => 'puppet://modules/modules/openshift/ansible.cfg',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644'
-    require => Package['ansible'],
-  }
-  # Main Ansible inventory
   file { '/etc/ansible/hosts':
     ensure       => file,
     content      => template('openshift/ansible_hosts.erb'),
