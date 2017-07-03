@@ -57,8 +57,9 @@ class openshift::role::ansible_master (
   ])
 
   # Get OpenShift Ansible playbooks
-  vcsrepo { '/usr/share/openshift-ansible':
+  vcsrepo { 'openshift-ansible':
     ensure   => present,
+    path     => '/usr/share/openshift-ansible',
     provider => git,
     revision => $playbooks_version,
     source   => $playbooks_source,
