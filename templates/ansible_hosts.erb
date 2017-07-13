@@ -33,7 +33,12 @@ end
 <%   if not (hosts = values.fetch('hosts', {})).empty? -%>
 [<%= group %>]
 <%     hosts.sort.each do |i, hostvars| -%>
-<%= i %> <%= hostvars.sort.map { |key, value| "#{key}=#{Shellwords.escape(ansiblize(value))}" }.join(' ') %>
+<%= i %>
+<%       if not hostvars.empty? -%>
+<%         hostvars.sort.each do |key, value| -%>
+<%= i %> <%= key %>=<%= Shellwords.escape(ansiblize(value)) %>
+<%         end -%>
+<%       end -%>
 <%     end -%>
 <%   end -%>
 <% end -%>
