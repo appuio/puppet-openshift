@@ -2,26 +2,59 @@
 #
 # === Parameters
 #
-# [*ansible_version*]
-#   Ansible version to install, usede for version lock. Must either be an exact
-#   Version number or end in `*`!
-#   Default: (see code)
+# [*host_groups*]
+#   Hash describing Ansible host groups. Each entry has the group name as its
+#   key and the optional keys "children" (array with child groups), "vars"
+#   (group-wide variables) or "hosts" (hash with machine names and hash as
+#   a value; the latter hash contains per-machine variables). Node names can be
+#   the full syntax supported by Ansible (i.e. "node[1:4].example.com").
+#
+#   Example: {
+#     OSEv3 => {
+#       children => ["nodes", "masters"],
+#     },
+#     masters => {
+#       vars => {
+#         osm_default_node_selector => "foo=bar",
+#       },
+#       hosts => {
+#         "master1.example.com" => {},
+#         "master2.example.com" => {},
+#       },
+#       children => ["etcd"],
+#     },
+#     nodes => {
+#       hosts => {
+#         "node[1:9].example.com" => {
+#           custom_var => true,
+#         },
+#       },
+#     },
+#   }
 #
 class openshift::role::ansible_master (
-  $ansible_hosts_children = {},
-  $ansible_hosts_vars = $::openshift::ansible_hosts_vars,
-  $ansible_version = '2.2.0.*',
-  $masters_as_nodes = true,
+  $host_groups,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
-  $run_ansible = true,
 ) {
+  validate_hash($host_groups)
+
   include ::openshift::util::cacert
 
-  ::openshift::util::yum_versionlock { ['ansible']:
-    ensure      => $ansible_version,
+  ensure_packages([
+    'yum-plugin-versionlock',
+    ])
+
+  # Use puppet/yum module with yum::versionlock instead of attempting a custom
+  # implementation
+  Package[yum-plugin-versionlock] ->
+  exec { 'delete-ansible-versionlock':
+    provider => 'shell',
+    onlyif => sprintf('/usr/bin/yum --cacheonly versionlock list | grep ',
+      shellquote('^0:ansible-2\.2\.')),
+    command => '/usr/bin/yum --cacheonly versionlock delete "ansible-2.2.*"',
   } ->
-  Package['ansible']
+  Package[ansible]
 
   # Install pre-req packages for the ansible master
   # This needs epel enabled
@@ -40,45 +73,40 @@ class openshift::role::ansible_master (
     provider => git,
     revision => $playbooks_version,
     source   => $playbooks_source,
-  } ->
+  }
 
-  # Set some Ansible configuration values
-  augeas { 'ansible.cfg':
-    lens    => 'Puppet.lns',
-    incl    => '/etc/ansible/ansible.cfg',
-    changes => [
-      'set /files/etc/ansible/ansible.cfg/ssh_connection/pipelining True',
-      'set /files/etc/ansible/ansible.cfg/ssh_connection/control_path /tmp/ansible-ssh-%%h-%%p-%%r',
-    ],
-    require => Package['ansible'],
-  } ->
+  create_resources('ini_setting', prefix({
+    'ssh-conn-pipelining' => {
+      section => 'ssh_connection',
+      setting => 'pipelining',
+      value   => 'True',
+    },
+    'ssh-conn-controlpath' => {
+      section => 'ssh_connection',
+      setting => 'control_path',
+      value   => '/tmp/ansible-ssh-%%h-%%p-%%r',
+    },
+    }, 'ansible-cfg-'), {
+      ensure  => present,
+      path    => '/etc/ansible/ansible.cfg',
+      require => Package[ansible],
+    })
 
-  # Write Ansible hosts file (this is the main configuration!)
+  # Main Ansible configuration
   file { '/etc/ansible/hosts':
-    ensure  => file,
-    content => template('openshift/ansible_hosts.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Package['ansible'],
-  } ->
+    ensure       => file,
+    content      => template('openshift/ansible_hosts.erb'),
+    owner        => 'root',
+    group        => 'root',
+    mode         => '0640',
+    require      => Package['ansible'],
 
-  # Deploy the Ansible run script
+    # https://docs.ansible.com/ansible/meta_module.html
+    validate_cmd => '/bin/ansible -i % -m meta -a noop localhost',
+  }
+
+  # Remove script no longer in use
   file { '/usr/local/bin/puppet_run_ansible.sh':
-    ensure => file,
-    source => 'puppet:///modules/openshift/puppet_run_ansible.sh',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0770',
+    ensure => absent,
   }
-
-  # Execute Ansible
-  if $run_ansible {
-    Exec['openshift-update-ca-trust'] ->
-    ::openshift::ansible::run { 'playbooks/byo/config.yml':
-      cwd     => '/usr/share/openshift-ansible',
-      require => File['/usr/local/bin/puppet_run_ansible.sh'],
-    }
-  }
-
 }
