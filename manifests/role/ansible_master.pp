@@ -50,7 +50,7 @@ class openshift::role::ansible_master (
   Package[yum-plugin-versionlock] ->
   exec { 'delete-ansible-versionlock':
     provider => 'shell',
-    onlyif => sprintf('/usr/bin/yum --cacheonly versionlock list | grep ',
+    onlyif => sprintf('/usr/bin/yum --cacheonly versionlock list | grep %s',
       shellquote('^0:ansible-2\.2\.')),
     command => '/usr/bin/yum --cacheonly versionlock delete "ansible-2.2.*"',
   } ->
