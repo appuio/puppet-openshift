@@ -1,44 +1,16 @@
-<%-
-require 'shellwords'
-
-def ansiblize(value)
-  if value.is_a?(FalseClass)
-    return 'False'
-  end
-
-  if value.is_a?(TrueClass)
-    return 'True'
-  end
-
-  return value.to_json
-end
--%>
 # THIS FILE IS MANAGED BY PUPPET MODULE <%= @module_name %>
-<% @host_groups.sort.each do |group, values| -%>
+<%-
+# Upstream example:
+# https://github.com/ansible/ansible/blob/v2.3.1.0-1/examples/hosts.yaml
 
-<%   if not (children = values.fetch('children', {})).empty? -%>
-[<%= group %>:children]
-<%     children.sort.each do |i| -%>
-<%= i %>
-<%     end -%>
-<%   end -%>
+# Generate new copy to modify
+groups = Marshal.load(Marshal.dump(@host_groups))
 
-<%   if not (vars = values.fetch('vars', {})).empty? -%>
-[<%= group %>:vars]
-<%     vars.sort.each do |key, value| -%>
-<%= key %>=<%= ansiblize(value) %>
-<%     end -%>
-<%   end -%>
-
-<%   if not (hosts = values.fetch('hosts', {})).empty? -%>
-[<%= group %>]
-<%     hosts.sort.each do |i, hostvars| -%>
-<%= i %>
-<%       if not hostvars.empty? -%>
-<%         hostvars.sort.each do |key, value| -%>
-<%= i %> <%= key %>=<%= Shellwords.escape(ansiblize(value)) %>
-<%         end -%>
-<%       end -%>
-<%     end -%>
-<%   end -%>
-<% end -%>
+groups.each_value do |group|
+  # Convert children to hashes
+  if group and group.include?('children')
+    group['children'] = Hash[group['children'].product([{}])]
+  end
+end
+%>
+<%= groups.to_yaml %>
