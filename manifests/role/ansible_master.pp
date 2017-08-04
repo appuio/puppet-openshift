@@ -41,21 +41,6 @@ class openshift::role::ansible_master (
 
   include ::openshift::util::cacert
 
-  ensure_packages([
-    'yum-plugin-versionlock',
-    ])
-
-  # Use puppet/yum module with yum::versionlock instead of attempting a custom
-  # implementation
-  Package[yum-plugin-versionlock] ->
-  exec { 'delete-ansible-versionlock':
-    provider => 'shell',
-    onlyif => sprintf('/usr/bin/yum --cacheonly versionlock list | grep %s',
-      shellquote('^0:ansible-2\.2\.')),
-    command => '/usr/bin/yum --cacheonly versionlock delete "ansible-2.2.*"',
-  } ->
-  Package[ansible]
-
   # Install pre-req packages for the ansible master
   # This needs epel enabled
   ensure_packages([

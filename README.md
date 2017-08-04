@@ -1,174 +1,117 @@
-# TODOs
+# Puppet module for managing OpenShift - the Ansible part
 
-* Firewall stuff!
-* Deploy Ansible user and SSH key (see profile_openshift3::ansible)
-* Manage /etc/sysconfig/docker-storage-setup
-* Manage partitioning (LVM volume preparation)
-* Integrate Gluster Playbook ?
-* Registry IP
-* Yum Versionlock support
-* Support for OCP
-* Documentation
-** vagrant.dev is not allowed in resolv.conf search when landrush returns wildcard
-   answers. see
-* https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.origin.example
-* Facts: Versions, Deploymenttype
+#### Table of Contents
 
-# Example Hieradata
+1. [Description](#description)
+2. [Setup - The basics of getting started with openshift](#setup)
+    * [What openshift affects](#what-openshift-affects)
+    * [Setup requirements](#setup-requirements)
+    * [Beginning with openshift](#beginning-with-openshift)
+3. [Usage - Configuration options and additional functionality](#usage)
+4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+5. [Limitations - OS compatibility, etc.](#limitations)
+6. [Development - Guide for contributing to the module](#development)
 
-## vagrant/hieradata_nodes/origin-master1.vagrant.dev.yaml
+## Description
 
-```
----
-classes:
-  - openshift::role::ansible_master
-  - profile_openshift3::ansible
+This Puppet module manages Ansible for setting up an OpenShift cluster with the official
+[openshift-ansible](https://github.com/openshift/openshift-ansible) Playbooks.
 
-openshift::role::ansible_master::run_ansible: false
-openshift::role::ansible_master::masters_as_nodes: true
-openshift::role::ansible_master::playbooks_version: 'openshift-ansible-3.3.28-1'
-openshift::role::ansible_master::ansible_hosts_vars:
-  ansible_become: true
-  ansible_ssh_user: ansible
-  containerized: true
-  deployment_type: origin
-  docker_version: 1.10.3
-  openshift_hosted_manage_registry: true
-  openshift_hosted_registry_replicas: 1
-  openshift_hosted_registry_selector: 'region=vagrant'
-  openshift_hosted_router_replicas: 1
-  openshift_hosted_router_selector: 'router=local'
-  openshift_install_examples: true
-  openshift_master_default_subdomain: 192.168.216.210.xip.io
-  openshift_master_identity_providers: [{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
-  openshift_release: v1.3.0
-  openshift_use_manageiq: false
-  openshift_use_nuage: false
-  os_sdn_network_plugin_name: redhat/openshift-ovs-multitenant
-openshift::role::ansible_master::ansible_hosts_children:
-  masters:
-    - name: origin-master1.vagrant.dev
-      ip: 192.168.216.201
-      node_labels:
-        region: infra
-      schedulable: true
-  nodes:
-    - name: origin-node1.vagrant.dev
-      ip: 192.168.216.210
-      node_labels:
-        region: vagrant
-    - name: origin-node2.vagrant.dev
-      ip: 192.168.216.211
-      node_labels:
-        region: vagrant
+## Setup
 
-profile_openshift3::ansible::ssh_public_key: ''
-profile_openshift3::ansible::ssh_private_key: |
+### What `openshift` affects
 
-vshn_infra::hostfirewall::enabled: false
-```
+The module has two "roles":
 
-## vagrant/hieradata_nodes/origin-node1.vagrant.dev.yaml
+* `openshift::role::ansible_master`:
+ * Installs Ansible
+ * Checks out `openshift-ansible` from git
+ * Configures SSH for Ansible
+ * Writes the inventory file in YAML format
+* `openshift::role::node`:
+  * Installs required packages
+  * Enables NetworkManager
+  * Add some missing CA certificates
 
-```
----
-classes:
-  - profile_openshift3::ansible
+### Setup Requirements
 
-profile_openshift3::ansible::ssh_public_key: ''
+Required modules:
 
-vshn_infra::hostfirewall::enabled: false
+* [vcsrepo](https://forge.puppet.com/puppetlabs/vcsrepo)
+* [inifile](https://forge.puppet.com/puppetlabs/inifile)
+
+### Beginning with `openshift`
+
+On the host you want to run Ansible, apply the `ansible_master` role and pass the inventory to it:
+
+```puppet
+class { 'openshift::role::ansible_master':
+  host_groups => {
+    'OSEv3' => {
+      children => ["nodes", "masters"],
+    },
+    masters => {
+      vars => {
+        osm_default_node_selector => "foo=bar",
+      },
+      hosts => {
+        "master1.example.com" => {},
+        "master2.example.com" => {},
+      },
+      children => ["etcd"],
+    },
+    nodes => {
+      hosts => {
+        "node[1:9].example.com" => {
+          custom_var => true,
+        },
+      },
+    },
+  }
+}
 ```
 
-## vagrant/hieradata_nodes/origin-node2.vagrant.dev.yaml
+This parameters can also be configured in Hiera.
 
-```
----
-classes:
-  - profile_openshift3::ansible
+An all nodes, apply the `node` role:
 
-profile_openshift3::ansible::ssh_public_key: ''
-
-vshn_infra::hostfirewall::enabled: false
+```puppet
+class { 'openshift::role::node': }
 ```
 
-# vmdefinitions
+## Usage
 
-## vagrant/vmdefinitions/origin-master1.vagrant.dev.yaml
+## Reference
 
-```
----
-## Puppet ENC
-environment: 'VshnProduction'
-parameters:
-  customer: 'local'
-  project: 'origin'
-  role: 'master'
-  location: 'vagrant'
-  stage: 'dev'
+### Classes
 
-## Vagrant VM definition
-cores: 2
-memory: 2048
-box: 'puppetlabs/centos-7.2-64-nocm'
-private_networks:
-  default:
-    type: 'static'
-    ip: '192.168.216.201'
-    auto_config: true
-```
+#### Public Classes
 
-## vagrant/vmdefinitions/origin-node1.vagrant.dev.yaml
+* `openshift::role::ansible_master`: Installs and configures Ansible.
 
-```
----
-## Puppet ENC
-environment: 'VshnProduction'
-parameters:
-  customer: 'local'
-  project: 'origin'
-  role: 'master'
-  location: 'vagrant'
-  stage: 'dev'
+[*host_groups*]
+  Default: {}. Hash of Ansible inventory data.
 
-## Vagrant VM definition
-cores: 2
-memory: 2048
-box: 'puppetlabs/centos-7.2-64-nocm'
-private_networks:
-  default:
-    type: 'static'
-    ip: '192.168.216.210'
-    auto_config: true
-```
+[*playbooks_source*]
+  Default: https://github.com/openshift/openshift-ansible.git.
+  Git repository where the Ansible plabooks are stored.
 
-## vagrant/vmdefinitions/origin-node2.vagrant.dev.yaml
+[*playbooks_version*]
+  Default: master
+  Git reference to check out
 
-```
----
-## Puppet ENC
-environment: 'VshnProduction'
-parameters:
-  customer: 'local'
-  project: 'origin'
-  role: 'master'
-  location: 'vagrant'
-  stage: 'dev'
+* `openshift::role::node`: Prepares node for OpenShift.
 
-## Vagrant VM definition
-cores: 2
-memory: 2048
-box: 'puppetlabs/centos-7.2-64-nocm'
-private_networks:
-  default:
-    type: 'static'
-    ip: '192.168.216.211'
-    auto_config: true
-```
+No parameters available.
 
+## Limitations
 
-# Usage
+This Puppet module only runs on CentOS and RHEL.
 
-## Create OpenShift User
+## Development
 
-Do this in VM origin-master1 as root: `htpasswd /etc/origin/master/htpasswd <username>`
+1. Fork it ( https://github.com/appuio/puppet-openshift/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request

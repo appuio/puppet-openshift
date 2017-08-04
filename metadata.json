@@ -1,16 +1,49 @@
 {
-  "name": "vshn-openshift",
-  "version": "0.0.1",
-  "author": "vshn",
-  "summary": "OpenShift with Ansible",
+  "name": "appuio-openshift",
+  "version": "1.0.0",
+  "author": "APPUiO",
+  "summary": "Manages OpenShift Ansible and Playbooks",
   "license": "BSD-3-Clause",
-  "source": "",
-  "project_page": "",
-  "issues_url": "",
+  "source": "https://github.com/appuio/puppet-openshift",
+  "project_page": "https://github.com/appuio/puppet-openshift",
+  "issues_url": "https://github.com/appuio/puppet-openshift/issues",
+  "tags": [
+    "appuio",
+    "openshift",
+    "ansible"
+  ],
   "dependencies": [
     {
-      "name": "puppetlabs-stdlib",
-      "version_requirement": ">= 1.0.0"
+      "name": "puppetlabs/vcsrepo",
+      "version_requirement": ">=1.0.0"
+    },
+    {
+      "name": "puppetlabs/inifile",
+      "version_requirement": ">=1.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": ">=3.8.0 <6.0.0"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": ">=3.8.0 <6.0.0"
     }
   ]
 }
