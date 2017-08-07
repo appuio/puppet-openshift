@@ -24,10 +24,10 @@ This Puppet module manages Ansible for setting up an OpenShift cluster with the 
 The module has two "roles":
 
 * `openshift::role::ansible_master`:
- * Installs Ansible
- * Checks out `openshift-ansible` from git
- * Configures SSH for Ansible
- * Writes the inventory file in YAML format
+  * Installs Ansible
+  * Checks out `openshift-ansible` from git
+  * Configures SSH for Ansible
+  * Writes the inventory file in YAML format
 * `openshift::role::node`:
   * Installs required packages
   * Enables NetworkManager
@@ -110,7 +110,7 @@ This Puppet module only runs on CentOS and RHEL.
 
 ## Development
 
-1. Fork it ( https://github.com/appuio/puppet-openshift/fork )
+1. Fork it (https://github.com/appuio/puppet-openshift/fork)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
