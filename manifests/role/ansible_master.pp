@@ -36,6 +36,7 @@ class openshift::role::ansible_master (
   $host_groups,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
+  $ansible_inventory = '/etc/ansible/hosts',
   $packages = [
     'ansible',
     'git',
@@ -79,7 +80,7 @@ class openshift::role::ansible_master (
     })
 
   # Main Ansible configuration
-  file { '/etc/ansible/hosts':
+  file { $ansible_inventory:
     ensure       => file,
     content      => template('openshift/ansible_hosts.erb'),
     owner        => 'root',
