@@ -36,6 +36,14 @@ class openshift::role::ansible_master (
   $host_groups,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
+  $ansible_inventory = '/etc/ansible/hosts',
+  $packages = [
+    'ansible',
+    'git',
+    'jq',
+    'pyOpenSSL',
+    'wget',
+  ],
 ) {
   validate_hash($host_groups)
 
@@ -43,13 +51,7 @@ class openshift::role::ansible_master (
 
   # Install pre-req packages for the ansible master
   # This needs epel enabled
-  ensure_packages([
-    'ansible',
-    'git',
-    'jq',
-    'pyOpenSSL',
-    'wget',
-  ])
+  ensure_packages($packages)
 
   # Get OpenShift Ansible playbooks
   vcsrepo { 'openshift-ansible':
@@ -78,7 +80,7 @@ class openshift::role::ansible_master (
     })
 
   # Main Ansible configuration
-  file { '/etc/ansible/hosts':
+  file { $ansible_inventory:
     ensure       => file,
     content      => template('openshift/ansible_hosts.erb'),
     owner        => 'root',
