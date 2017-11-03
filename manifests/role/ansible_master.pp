@@ -46,7 +46,6 @@ class openshift::role::ansible_master (
   ensure_packages([
     'ansible',
     'git',
-    'jq',
     'pyOpenSSL',
     'wget',
   ])
