@@ -22,7 +22,7 @@ class openshift::role::node (
     #
     # https://github.com/openshift/openshift-ansible/issues/1807
     #
-    Package[NetworkManager] ->
+    Package['NetworkManager'] ->
     service { 'openshift-networkmanager':
       name   => 'NetworkManager',
       ensure => 'running',
