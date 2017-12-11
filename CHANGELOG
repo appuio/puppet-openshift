@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.2.1
+
+* Quote resource "NetworkManager" so it's a string
+
 ## v2.2.0
 
 * Initial public release
