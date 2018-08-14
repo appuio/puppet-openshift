@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.2.2
+
+* Enable Ansible option "show_custom_stats" to always show statistics
+
 ## v2.2.1
 
 * Quote resource "NetworkManager" so it's a string
