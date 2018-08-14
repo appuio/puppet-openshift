@@ -60,12 +60,17 @@ class openshift::role::ansible_master (
   }
 
   create_resources('ini_setting', prefix({
-    'ssh-conn-pipelining' => {
+    'defaults-show-custom-stats' => {
+      section => 'defaults',
+      setting => 'show_custom_stats',
+      value   => 'True',
+    },
+    'ssh-conn-pipelining'        => {
       section => 'ssh_connection',
       setting => 'pipelining',
       value   => 'True',
     },
-    'ssh-conn-controlpath' => {
+    'ssh-conn-controlpath'       => {
       section => 'ssh_connection',
       setting => 'control_path',
       value   => '/tmp/ansible-ssh-%%h-%%p-%%r',
