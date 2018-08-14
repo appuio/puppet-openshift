@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v2.2.2
+## v2.2.3
 
 * Enable Ansible option "show_custom_stats" to always show statistics
 
