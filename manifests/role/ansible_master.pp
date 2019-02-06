@@ -32,12 +32,17 @@
 #     },
 #   }
 #
+# [*manage_ansible_cfg*]
+#   Whether to manage a couple of settings in "/etc/ansible/ansible.cfg".
+#
 class openshift::role::ansible_master (
   $host_groups,
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
+  $manage_ansible_cfg = true,
 ) {
   validate_hash($host_groups)
+  validate_bool($manage_ansible_cfg)
 
   include ::openshift::util::cacert
 
@@ -59,27 +64,29 @@ class openshift::role::ansible_master (
     source   => $playbooks_source,
   }
 
-  create_resources('ini_setting', prefix({
-    'defaults-show-custom-stats' => {
-      section => 'defaults',
-      setting => 'show_custom_stats',
-      value   => 'True',
-    },
-    'ssh-conn-pipelining'        => {
-      section => 'ssh_connection',
-      setting => 'pipelining',
-      value   => 'True',
-    },
-    'ssh-conn-controlpath'       => {
-      section => 'ssh_connection',
-      setting => 'control_path',
-      value   => '/tmp/ansible-ssh-%%h-%%p-%%r',
-    },
-    }, 'ansible-cfg-'), {
-      ensure  => present,
-      path    => '/etc/ansible/ansible.cfg',
-      require => Package[ansible],
-    })
+  if $manage_ansible_cfg {
+    create_resources('ini_setting', prefix({
+      'defaults-show-custom-stats' => {
+        section => 'defaults',
+        setting => 'show_custom_stats',
+        value   => 'True',
+      },
+      'ssh-conn-pipelining'        => {
+        section => 'ssh_connection',
+        setting => 'pipelining',
+        value   => 'True',
+      },
+      'ssh-conn-controlpath'       => {
+        section => 'ssh_connection',
+        setting => 'control_path',
+        value   => '/tmp/ansible-ssh-%%h-%%p-%%r',
+      },
+      }, 'ansible-cfg-'), {
+        ensure  => present,
+        path    => '/etc/ansible/ansible.cfg',
+        require => Package[ansible],
+      })
+  }
 
   # Main Ansible configuration
   file { '/etc/ansible/hosts':

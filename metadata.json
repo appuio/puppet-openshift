@@ -1,6 +1,6 @@
 {
   "name": "appuio-openshift",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "author": "APPUiO",
   "summary": "Manages OpenShift Ansible and Playbooks",
   "license": "BSD-3-Clause",
