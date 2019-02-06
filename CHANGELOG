@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v2.2.4
+
+* Add parameter to "openshift::role::ansible_master" class to control
+  management of Ansible configuration (not inventory).
+
 ## v2.2.3
 
 * Enable Ansible option "show_custom_stats" to always show statistics
