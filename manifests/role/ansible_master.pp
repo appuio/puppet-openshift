@@ -40,9 +40,11 @@ class openshift::role::ansible_master (
   $playbooks_source = 'https://github.com/openshift/openshift-ansible.git',
   $playbooks_version = 'master',
   $manage_ansible_cfg = true,
+  $inventory_file = '/etc/ansible/hosts',
 ) {
   validate_hash($host_groups)
   validate_bool($manage_ansible_cfg)
+  validate_absolute_path($inventory_file)
 
   include ::openshift::util::cacert
 
@@ -89,7 +91,7 @@ class openshift::role::ansible_master (
   }
 
   # Main Ansible configuration
-  file { '/etc/ansible/hosts':
+  file { $inventory_file:
     ensure       => file,
     content      => template('openshift/ansible_hosts.erb'),
     owner        => 'root',
