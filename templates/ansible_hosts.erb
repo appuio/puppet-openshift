@@ -8,7 +8,7 @@ groups = Marshal.load(Marshal.dump(@host_groups))
 
 groups.each_value do |group|
   # Convert children to hashes
-  if group and group.include?('children')
+  if group and group.include?('children') and group['children'].class == Array
     group['children'] = Hash[group['children'].product([{}])]
   end
 end
