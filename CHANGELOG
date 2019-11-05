@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.2.6
+
+* Fix changelog
+
+## v2.2.5
+
+* Accept Hash for group children
+
 ## v2.2.4
 
 * Add parameter to "openshift::role::ansible_master" class to control
